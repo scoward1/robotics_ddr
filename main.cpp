@@ -7,19 +7,20 @@ use the serial option, and then select the correct COM port
 */
 
 // TODO: look into using an interrupt for the to receive faster/more often
+// TODO: put bluetooth setup in a pixy.h file and then use that to print to putty
 
 #include "mbed.h"
 #include "SPI.h"
-
-// bluetooth setup
-Serial blue(p9, p10);           // TX, RX communication from/to the bluetooth module
+#include "Pixy.h"
 
 // SPI
 #define SPI_MOSI_PIN p5
 #define SPI_MISO_PIN p6
 #define SPI_SCK_PIN p7
 #define SPI_SS_PIN p8
-SPI pixy_spi(SPI_MOSI_PIN, SPI_MISO_PIN, SPI_SCK_PIN, SPI_SS_PIN);
+//Serial serial(USBTX, USBRX);
+SPI spi(SPI_MOSI_PIN, SPI_MISO_PIN, SPI_SCK_PIN);
+PixySPI pixy(&spi, &blue);
 
 // motor output setup
 PwmOut mot2(p26);
@@ -32,10 +33,12 @@ DigitalOut statusLED1(LED1);
 DigitalOut statusLED2(LED2);
 
 // led setup 
+/*
 DigitalOut led1(LED1);          // mbed LEDs - using just for bluetooth testing at the moment
 DigitalOut led2(LED2);
 DigitalOut led3(LED3);
 DigitalOut led4(LED4);
+*/
 
 char c;
 bool mode;                      // following mode vs rc car mode
@@ -43,6 +46,7 @@ bool mode;                      // following mode vs rc car mode
 int main() 
 {    
     int response = 0;
+    ddrControl(pixy);
     
     // activate chip selects
     cs1 = 0;
@@ -57,9 +61,9 @@ int main()
     {
         while(mode){
             //testing the pixy spi connection
-            pixy_spi.lock();
-            response = pixy_spi.write(0xFF);
-            pixy_spi.unlock();
+            //pixy_spi.lock();
+            //response = pixy_spi.write(0xFF);
+            //pixy_spi.unlock();
 
             if(response){
                 led1 = !led1;

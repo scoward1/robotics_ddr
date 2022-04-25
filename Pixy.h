@@ -6,7 +6,7 @@
 #include <cstdint>
 
 // bluetooth setup
-Serial blue(p9, p10);           // TX, RX communication from/to the bluetooth module
+Serial device(p9, p10);           // TX, RX communication from/to the bluetooth module
 
 // led setup 
 DigitalOut led1(LED1);          // mbed LEDs - using just for bluetooth testing at the moment
@@ -85,8 +85,8 @@ int32_t ddrControl(TPixyInterface pixy, Serial* serial = NULL)
     if (blocks) {
         xError = X_CENTER - pixy.blocks[0].x;
         yError = pixy.blocks[0].y - Y_CENTER;
-        blue.printf("xError: %d\t", xError);
-        blue.printf("yError: %d\n\r", yError);
+        device.printf("xError: %d\t", xError);
+        //blue.printf("yError: %d\n\r", yError);
 
         return(xError);
  

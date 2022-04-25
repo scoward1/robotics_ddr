@@ -73,6 +73,20 @@ double DC2;
 double angv;
 double linv;
 
+// determine the wref from xError
+/*
+double kpFollow = 0.00001;
+double kiFollow = 0.0001;
+double wrefFollow; 
+double wrefFollowed = 10; 
+double wrefFollowOld = 0;*/
+
+char c;
+bool mode;                      // following mode vs rc car mode
+
+int32_t xError;
+int32_t xErrorOld = 0;
+
 // counter function for motor 1
  void update_count1()
  {
@@ -163,17 +177,47 @@ double get_pwm2(double wref2, double cnew)
      return DC2;
 }                          
 
+void getWref(){
+    /*wrefFollow = ((kpFollow+(kiFollow*ts))*xError)-(kpFollow*xErrorOld)+(wrefFollowOld);
+    
+    if(wrefFollow > 20){
+        wrefFollowed = 20;
+    }
+    if(wrefFollow < -20){
+        wrefFollowed = -20;
+    }
+
+    wref1_g = -wrefFollowed/2;
+    wref2_g = wrefFollowed/2;
+
+    xErrorOld = xError;
+    wrefFollowOld = wrefFollowed;
+    */
+    if(xError > 0){
+        wref1_g = 10;
+        wref2_g = -10;
+    }else if(xError < 0){
+        wref1_g = -10;
+        wref2_g = 10;
+    }else {
+        wref1_g = 0;
+        wref2_g = 0;
+    }
+}
+
 // one function to call the generate pwn functions
 void get_pwm()
-{
+{   
+    if(!mode){
+        // if in follow mode find wref
+        getWref();
+    }
+
     mot1=get_pwm1(wref1_g, counter1);
     mot2=get_pwm2(wref2_g, counter2);
     angv=((speed1*0.13)-(0.13*speed2))/0.3;
     linv=((speed1*0.13)+(0.13*speed2))/2;
 }
-
-char c;
-bool mode;                      // following mode vs rc car mode
  
 int main() 
 {   
@@ -220,8 +264,6 @@ int main()
     ain2.rise(update_count2);
     pwm_call.attach_us(get_pwm,1200);
     
-    int32_t xError;
-    
     mode = true;
     
     // read in the character, toggle lights accordingly
@@ -232,16 +274,16 @@ int main()
                 c = device.getc();        // read in character      
                 switch(c){
                     case 'a':           // turn left (faster right motor)
-                        wref2_g = -wref;
-                        wref1_g = wref;
+                        wref2_g = -20;
+                        wref1_g = 20;
                         break;
                     case 's':           // both motors back
                         wref1_g = -wref;
                         wref2_g = -wref;
                         break;
                     case 'd':           // turn right (faster left motor)
-                        wref2_g = wref;
-                        wref1_g = -wref;
+                        wref2_g = 20;
+                        wref1_g = -20;
                         break;
                     case 'w':
                         wref1_g = wref;
@@ -251,6 +293,16 @@ int main()
                         mode = false;
                         wref1_g = 0;
                         wref2_g = 0;
+                        break;
+                    case 'r':
+                        if(wref < 80){
+                            wref = wref + 10;
+                        }
+                        break;
+                    case 'f':
+                        if(wref >= 10){
+                            wref = wref - 10;
+                        }
                         break;
                     default:
                         wref1_g = 0;
@@ -265,9 +317,11 @@ int main()
                 switch(c){
                     case 'l':
                         mode = true;
+                        wref = 30;
                         break;
                     default:
                         xError = ddrControl(pixy);
+                        //device.printf("wrefFollowed: %d\t, wrefFollow: %d\n\r", wrefFollowed, wrefFollow);
                         break;
                 }
             }

@@ -194,11 +194,11 @@ void getWref(){
     wrefFollowOld = wrefFollowed;
     */
     if(xError > 0){
-        wref1_g = 10;
-        wref2_g = -10;
+        wref1_g = 20;
+        wref2_g = -20;
     }else if(xError < 0){
-        wref1_g = -10;
-        wref2_g = 10;
+        wref1_g = -20;
+        wref2_g = 20;
     }else {
         wref1_g = 0;
         wref2_g = 0;

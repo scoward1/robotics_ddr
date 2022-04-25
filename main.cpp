@@ -44,10 +44,8 @@ char c;
 bool mode;                      // following mode vs rc car mode
  
 int main() 
-{    
-    int response = 0;
-    ddrControl(pixy);
-    
+{   
+    int32_t xError;
     // activate chip selects
     cs1 = 0;
     cs2 = 0;
@@ -60,19 +58,6 @@ int main()
     while (1) 
     {
         while(mode){
-            //testing the pixy spi connection
-            //pixy_spi.lock();
-            //response = pixy_spi.write(0xFF);
-            //pixy_spi.unlock();
-
-            if(response){
-                led1 = !led1;
-            }
-            else{
-                led2 = !led2;
-            }
-            wait(1);
-
             if (blue.readable()){
                 c = blue.getc();        // read in character      
                 switch(c){
@@ -129,6 +114,7 @@ int main()
                         mode = true;
                         break;
                     default:
+                        xError = ddrControl(pixy);
                         break;
                 }
             }

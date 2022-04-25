@@ -3,6 +3,7 @@
 
 #include "TPixy.h"
 #include "TPixyInterface.h"
+#include <cstdint>
 
 // bluetooth setup
 Serial blue(p9, p10);           // TX, RX communication from/to the bluetooth module
@@ -71,7 +72,7 @@ public:
 
 
 template <class TPixyInterface> 
-void ddrControl(TPixyInterface pixy, Serial* serial = NULL)
+int32_t ddrControl(TPixyInterface pixy, Serial* serial = NULL)
 {
     //ServoLoop panLoop(-150, -300);
     //ServoLoop tiltLoop(200, 250);
@@ -80,14 +81,14 @@ void ddrControl(TPixyInterface pixy, Serial* serial = NULL)
     uint16_t blocks;
     int32_t xError, yError;
     pixy.init();
-    while(true) {
-        blocks = pixy.getBlocks();
-        if (blocks) {
-            xError = X_CENTER - pixy.blocks[0].x;
-            yError = pixy.blocks[0].y - Y_CENTER;
-            blue.printf("xError: %d\t", xError);
-            blue.printf("yError: %d\n\r", yError);
-            wait(1);
+    blocks = pixy.getBlocks();
+    if (blocks) {
+        xError = X_CENTER - pixy.blocks[0].x;
+        yError = pixy.blocks[0].y - Y_CENTER;
+        blue.printf("xError: %d\t", xError);
+        blue.printf("yError: %d\n\r", yError);
+
+        return(xError);
  
             //panLoop.update(panError);
             //tiltLoop.update(tiltError);
@@ -103,7 +104,6 @@ void ddrControl(TPixyInterface pixy, Serial* serial = NULL)
                     pixy.printBlock(pixy.blocks[j]);
                 }
             }*/
-        }
     }
 }
 #endif
